@@ -1,22 +1,13 @@
-import asyncio, os, jsonbox, gspread, base64
+import asyncio, data
 from PIL import Image, ImageDraw, ImageFont
 from math import ceil
 from random import shuffle
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from datetime import datetime
 
-with open('auth.json', 'w', encoding='utf-8') as f: 
-    f.write(base64.b64decode(jsonbox.JsonBox().read(os.getenv('JSON_BOX'))[0]['auth']).decode('utf-8'))
-client = gspread.service_account('auth.json')
-os.remove('auth.json')
-sheet = client.open_by_key(os.getenv('SHEET'))
-sheet.worksheet('REFRESH').update('A2', datetime.now().strftime('%d.%m.%Y %H:%I:%S'))
-responses = sheet.worksheet('RESPONSES').get_all_records()
-rounds_raw = sheet.worksheet('ROUNDS').get_all_records()
+responses = data.get('RESPONSES')
+rounds_raw = data.get('ROUNDS')
 rounds = {}
-
-#print(rounds_raw)
 
 for i in rounds_raw:
     ii = i.copy()
@@ -36,11 +27,24 @@ prompt_card = Image.open('Resources/Cards/tah_prompt.png')
 response_card = Image.open('Resources/Cards/tah_response.png')
 font = ImageFont.truetype('Resources/Cards/font.ttf', 96)
 
+def prompt_of(response):
+    return rounds[response['TWOW']][response['Season']][response['Round']]
+
 class Cards:
 
-    def __init__(self, filter=True, filter2=True):
-        self.responses = [i['Response'] for i in responses if filter]
-        self.prompts = [i['Prompt'] for i in rounds_raw if filter2]
+    def __init__(self, filter_responses, filter_prompts):
+        self.responses = [i['Response'] for i in responses if filter_responses(i, prompt=False)]
+        self.prompts = [i['Prompt'] for i in rounds_raw if filter_prompts(i, prompt=True)]
+        
+        errors = []
+        if len(self.responses) == 0:
+            errors.append('There are no responses that satisfy the provided filter!')
+        if len(self.prompts) == 0:
+            errors.append('There are no prompts that satisfy the provided filter!')
+        
+        if errors:
+            raise Exception('\n'.join(errors))
+        
         self.response_index = 0
         self.prompt_index = 0
         shuffle(self.responses)

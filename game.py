@@ -1,9 +1,11 @@
-import io, validator, asyncio
+import io, validator, asyncio, filters
 from stage import Stage
 from validator import Validator as V
 from player import Player
 from cards import Cards
 from discord import File
+from filter import parse as filparse
+from functools import partial
 
 class Game:
 
@@ -19,8 +21,14 @@ class Game:
             'draw_time': V(validator.float_range(0.25, 5), 'The drawing time must be between 0.25 and 5 minutes!', '1'),
             'respond_time': V(validator.float_range(0.25, 5), 'The responding time must be between 0.25 and 5 minutes!', '1'),
             'vote_time': V(validator.float_range(0.25, 5), 'The voting time must be between 0.25 and 5 minutes!', '1'),
-            'rounds': V(validator.float_range(1, 25), 'There must be between 1 and 25 rounds!', '10')
+            'rounds': V(validator.float_range(1, 25), 'There must be between 1 and 25 rounds!', '10'),
+            'rfilter': V(None, 'No filter with that name exists.', 'none'),
+            'pfilter': V(None, 'No filter with that name exists.', 'none'),
         }
+
+        self.rfilter = None
+        self.pfilter = None
+        
         self.players = []
         self.prompt = {}
         self.responses = []
@@ -33,6 +41,7 @@ class Game:
 
         self.stage = Stage.JOIN
         self.author = author
+        self.settings['rfilter'].validate = self.settings['pfilter'].validate = partial(filters.exists, self.author.id)
 
         response = self.set(author, settings, True)  
 
@@ -92,7 +101,47 @@ class Game:
             return {'ok': False, 'message': f'Only the creator, **@{self.author.name}#{self.author.discriminator}**, can start this game.'}
         if len(self.players) < 2:
             return {'ok': False, 'message': 'There must be at least 2 players!'}
-        self.cards = Cards()
+        
+        errors = []
+        
+        if self.settings['rfilter'].value in filters.reserved:
+            self.rfilter = filparse(filters.get(self.author.id, self.settings['rfilter'].value), self.author.id)['data']
+        else:
+            if filters.exists(self.author.id, self.settings['rfilter'].value):
+                fil = filparse(filters.get(self.author.id, self.settings['rfilter'].value), self.author.id, 'rfilter')
+                if fil['ok']:
+                    self.rfilter = fil['data']
+                else:
+                    errors += fil['message'].split('\n')
+            else:
+                rf = self.settings['rfilter'].value
+                errors.append(f'Error setting rfilter: No filter named "{rf}" exists.')
+        
+        if self.settings['pfilter'].value in filters.reserved:
+            self.pfilter = filparse(filters.get(self.author.id, self.settings['pfilter'].value), self.author.id)['data']
+        else:
+            if filters.exists(self.author.id, self.settings['pfilter'].value):
+                fil = filparse(filters.get(self.author.id, self.settings['pfilter'].value), self.author.id, 'pfilter')
+                if fil['ok']:
+                    self.pfilter = fil['data']
+                else:
+                    errors += fil['message'].split('\n')
+            else:
+                pf = self.settings['pfilter'].value
+                errors.append(f'Error setting pfilter: No filter named "{pf}" exists.')
+        
+
+        if not errors:
+            self.cards = Cards(self.rfilter, self.pfilter)
+            try:
+                self.cards = Cards(self.rfilter, self.pfilter)
+            except Exception as e:
+                errors += str(e).split('\n')
+
+        if errors:
+            nl = '\n- '
+            return {'ok': False, 'message': f'```diff\n- {nl.join(errors)}\n```\nGame failed to start.'}
+        
         self.stage = Stage.DRAW
         self.round = 1
         self.deal()
@@ -162,15 +211,14 @@ class Game:
             await asyncio.sleep(60 * float(self.settings['draw_time'].value) * (1 if self.round > 1 else int(self.settings['hand_size'].value)))
             if self.stage != Stage.END:
                 self.flush_deck()
-                prompt = self.cards.get_prompt()
+                self.prompt = self.cards.get_prompt()
                 f = io.BytesIO()
-                (await self.cards.get_prompt_card(prompt, str(self.round))).save(f, format='PNG')
+                (await self.cards.get_prompt_card(self.prompt, str(self.round))).save(f, format='PNG')
                 f.seek(0)
-                self.prompt = {'prompt': prompt, 'image': f}
                 self.responses.clear()
                 self.stage = Stage.RESPOND
                 out['ok'] = True
-                out['messages'].append({'message': 'Round ' + str(self.round) + ' prompt:', 'files': [File(self.prompt['image'], 'prompt.png')]})
+                out['messages'].append({'message': 'Round ' + str(self.round) + ' prompt:', 'files': [File(f, 'prompt.png')]})
         elif self.stage == Stage.RESPOND:
             await asyncio.sleep(60 * float(self.settings['respond_time'].value))
             if self.stage != Stage.END:
@@ -247,8 +295,10 @@ class Game:
                 f = io.BytesIO()
                 (await self.cards.make_hand(player.hand)).save(f, format='PNG')
                 f.seek(0)
-                self.prompt['image'].seek(0)
-            return {'ok': True, 'message': 'Choose a response to answer this prompt:.', 'data': {'files': [File(self.prompt['image'], 'prompt.png'), File(f, 'hand.png')], 'react': True, 'max': len(player.hand)}}
+                fp = io.BytesIO()
+                (await self.cards.get_prompt_card(self.prompt, str(self.round))).save(fp, format='PNG')
+                fp.seek(0)
+            return {'ok': True, 'message': 'Choose a response to answer this prompt:.', 'data': {'files': [File(fp, 'prompt.png'), File(f, 'hand.png')], 'react': True, 'max': len(player.hand)}}
         elif self.stage == Stage.VOTE:
             for i in self.votes:
                 if i == player:

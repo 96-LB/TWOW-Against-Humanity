@@ -3,6 +3,7 @@ async def ensure(coro, repeat=10):
     while(i < repeat):
         try:
             return await coro()
-        except:
+        except Exception as e:
+            print(f'{e} (Retrying...)')
             i += 1
     return await coro()

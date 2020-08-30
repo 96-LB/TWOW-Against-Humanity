@@ -2,17 +2,22 @@ import discord, os, keep_alive
 from discord.ext import commands
 from datetime import datetime, timezone
 
-cogs=['cogs.test', 'cogs.tah']
-
 bot = commands.Bot(command_prefix='tah.', help_command=None)
 
 @bot.event
 async def on_ready():
-    for cog in cogs:
-        bot.load_extension(cog)
+    for cog in [cog.replace('.py', '') for cog in os.listdir('cogs') if '.py' in cog]:
+        await bot.change_presence(activity=discord.Game(name=f'loading cogs.{cog}'))
+        print(f'loading cogs.{cog}')
+        try:
+            bot.load_extension(f'cogs.{cog}')
+        except Exception as e:
+            await bot.change_presence(activity=discord.Game(name=f'error loading cogs.{cog}!'))
+            print(f'error loading cogs.{cog}!')
+            raise e
     await bot.change_presence(activity=discord.Game(name='since ' + datetime.now(timezone.utc).strftime('%-d.%-m.%y %-H:%M %Z')))
-    
-        
+    print('since ' + datetime.now(timezone.utc).strftime('%-d.%-m.%y %-H:%M %Z'))
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):

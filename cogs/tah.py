@@ -3,6 +3,7 @@ from discord.ext import commands
 from game import Game
 from stage import Stage
 from asyncmyo import ensure
+from functools import partial
 
 class TAH(commands.Cog):
     
@@ -120,7 +121,7 @@ class TAH(commands.Cog):
                             asyncio.create_task(self.draw(game, player))
                     for message in response['messages']:
                         if game.stage != Stage.END or ('force' in response and response['force']):
-                            await ctx.send(content=message['message'], files=message['files'])
+                            await ensure(partial(ctx.send, content=message['message'], files=message['files']))
                             await asyncio.sleep(response['delay'])
                     stage = game.stage
                     response = await game.run()
@@ -134,7 +135,7 @@ class TAH(commands.Cog):
         response = await game.draw(player)
         if response['ok']:
             data = response['data']
-            message = await player.id.send(content=response['message'], files=data['files'])
+            message = await ensure(partial(player.id.send, content=response['message'], files=data['files']))
             if data['react']:
                 for i in range(data['max']):
                     await message.add_reaction(react.emoji(i))

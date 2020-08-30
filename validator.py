@@ -1,4 +1,4 @@
-import math
+import math, parse, regex
 
 def valid():
     def validator(x):
@@ -28,6 +28,15 @@ def is_float():
             return False
     return validator
 
+def is_percent():
+    def validator(x):
+        try:
+            x = parse.percent_to_float(x)
+            return True
+        except:
+            return False
+    return validator
+
 def int_range(lower=-math.inf, upper=math.inf, inclusive=True):
     def validator(x):
         try:
@@ -52,6 +61,35 @@ def float_range(lower=-math.inf, upper=math.inf, inclusive=True):
             return lower < x < upper
     return validator
 
+def num_comp(num, operator='='):
+    def validator(x):
+        if x is True:
+            return True
+        try:
+            x = float(x)
+        except:
+            return False
+        a = x == num
+        b = x < num
+        return {'=': a, '!=': not a, '<': b, '>=': not b, '<=': a or b, '>': not (a or b)}[operator]
+    return validator
+
+def str_comp(str, operator='='):
+    def validator(x):
+        if x is True:
+            return True
+        split = [regex.sub(r'\\\\|\\\(|\\\)|\\\*|\\_|_', lambda x: ' ' if x[0] == '_' else x[0][1], i) for i in regex.findall(r'(?:\\\\|\\\*|[^*])+', str.lower())]
+        x = x.lower()
+        if (str.startswith('*') or x.startswith(split[0])) and (str.endswith('*') or x.endswith(split[-1])):
+            b = True
+            for i in split:
+                if i not in x:
+                    b = False
+                    break
+                x = x[x.find(i) + len(i):]
+            return {'=': b, '!=': not b}[operator]
+        return {'=': False, '!=': True}[operator]
+    return validator
 
 
 class Validator:
