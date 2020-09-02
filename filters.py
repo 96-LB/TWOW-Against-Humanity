@@ -4,6 +4,7 @@ reserved = {
 }
 
 filters = {}
+size = 0
 
 for i in data.get('FILTERS'):
     author = i['Author']
@@ -12,6 +13,7 @@ for i in data.get('FILTERS'):
         filters[author] = {}
     if name not in filters[author]:
         filters[author][name] = i['Data']
+        size += 1
 
 
 def exists(author, name):
@@ -37,8 +39,15 @@ def delete(author, name):
         update()
 
 def update():
-    cells = [['Author', 'Name', 'Data']]
+    global size
+    cells = [['Author', 'Name', 'Data']] + [['', '', '']] * size
+    size = 0
     for a in filters:
         for n in filters[a]:
-            cells.append([str(a), n, filters[a][n]])
+            size += 1
+            l = [str(a), n, filters[a][n]]
+            if size == len(cells):
+                cells.append(l)
+            else:
+                cells[size] = l
     data.set('FILTERS', cells)
