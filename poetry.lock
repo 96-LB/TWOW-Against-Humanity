@@ -214,18 +214,6 @@ i18n = ["Babel (>=0.8)"]
 
 [[package]]
 category = "main"
-description = "Python wrapper for jsonbox.io"
-name = "jsonbox"
-optional = false
-python-versions = ">=2.7"
-version = "1.2.1"
-
-[package.dependencies]
-requests = "*"
-six = "*"
-
-[[package]]
-category = "main"
 description = "Safely add untrusted strings to HTML/XML markup."
 name = "markupsafe"
 optional = false
@@ -394,7 +382,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "f0a3dc61661579230cb23442151ab6636e1cec69a300d7b8acfdb7b0f4339797"
+content-hash = "bece8ee7fe151dbef53dd41efd437102b5212aeeea4d84fd1fc931b3b1f1ff7d"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -479,10 +467,6 @@ itsdangerous = [
 jinja2 = [
     {file = "Jinja2-2.11.2-py2.py3-none-any.whl", hash = "sha256:f0a4641d3cf955324a89c04f3d94663aa4d638abe8f733ecd3582848e1c37035"},
     {file = "Jinja2-2.11.2.tar.gz", hash = "sha256:89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0"},
-]
-jsonbox = [
-    {file = "jsonbox-1.2.1-py2-none-any.whl", hash = "sha256:13d74eabd167d4453f9ce4ee82865ab3f505307af4529c74e4ce69562c5000fa"},
-    {file = "jsonbox-1.2.1.tar.gz", hash = "sha256:52ee1634e58c908efde8e62df34d50eb2c1e3811e0a9425751eaa0bc8a80e58b"},
 ]
 markupsafe = [
     {file = "MarkupSafe-1.1.1-cp27-cp27m-macosx_10_6_intel.whl", hash = "sha256:09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161"},
