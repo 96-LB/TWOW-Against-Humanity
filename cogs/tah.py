@@ -128,7 +128,7 @@ class TAH(commands.Cog):
                 ### MAIN CONTROL LOOP
             
                 if ctx.channel in self.games:
-                    print(f"{ctx.channel.id} popped because control loop terminated.")
+                    print(f'{ctx.channel.id} popped because control loop terminated. ({response})')
                     self.games.pop(ctx.channel)
 
     async def draw(self, game, player):
