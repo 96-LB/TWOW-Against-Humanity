@@ -61,34 +61,48 @@ def float_range(lower=-math.inf, upper=math.inf, inclusive=True):
             return lower < x < upper
     return validator
 
-def num_comp(num, operator='='):
+def num_comp(number, operator='='):
     def validator(x):
         if x is True:
             return True
         try:
-            x = float(x)
+            x = parse.num(x)
         except:
             return False
-        a = x == num
-        b = x < num
-        return {'=': a, '!=': not a, '<': b, '>=': not b, '<=': a or b, '>': not (a or b)}[operator]
+        a = x == number
+        b = x < number
+        return {
+            '=': a, 
+            '!=': not a, 
+            '<': b, 
+            '>=': not b, 
+            '<=': a or b, 
+            '>': not (a or b)
+        }[operator]
     return validator
 
-def str_comp(str, operator='='):
+def str_comp(string, operator='='):
     def validator(x):
         if x is True:
             return True
-        split = [regex.sub(r'\\\\|\\\(|\\\)|\\\*|\\_|_', lambda x: ' ' if x[0] == '_' else x[0][1], i) for i in regex.findall(r'(?:\\\\|\\\*|[^*])+', str.lower())]
+        try:
+            x = str(x)
+        except:
+            return False
+        split = [regex.sub(r'\\\\|\\\(|\\\)|\\\*|\\_|_', lambda x: ' ' if x[0] == '_' else x[0][1], i) for i in regex.findall(r'(?:\\\\|\\\*|[^*])+', string.lower())]
         x = x.lower()
-        if (str.startswith('*') or x.startswith(split[0])) and (str.endswith('*') or x.endswith(split[-1])):
+        b = False
+        if (string.startswith('*') or x.startswith(split[0])) and (string.endswith('*') or x.endswith(split[-1])):
             b = True
             for i in split:
                 if i not in x:
                     b = False
                     break
                 x = x[x.find(i) + len(i):]
-            return {'=': b, '!=': not b}[operator]
-        return {'=': False, '!=': True}[operator]
+        return {
+            '=': b,
+            '!=': not b
+        }[operator]
     return validator
 
 

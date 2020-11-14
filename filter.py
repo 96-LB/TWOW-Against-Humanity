@@ -87,23 +87,23 @@ class Filter:
 
     filters = {
         'legal': ('legal|illegal', lambda r: 'legal', lambda p: 'legal'),
-        'response': ('str', lambda r: str(r['Response']), valid), 
-        'author': ('str', lambda r: str(r['Author']), valid),
-        'type': ('Contestant|DRP|Host|Dummy', lambda r: str(r['Type']), valid), 
-        'rank': ('num', lambda r: num(r['Rank']), valid),
-        'true_rank': ('num', lambda r: num(r['TrueRank']), valid),
+        'response': ('str', lambda r: r['Response'], valid), 
+        'author': ('str', lambda r: r['Author'], valid),
+        'type': ('Contestant|DRP|Host|Dummy', lambda r: r['Type'], valid), 
+        'rank': ('num', lambda r: r['Rank'], valid),
+        'true_rank': ('num', lambda r: r['TrueRank'], valid),
         'nr': ('num', lambda r: 1 - ((num(r['Rank']) - 1) / (num(prmpt(r)['Contestants']) - (1 if str(r['Type']) == 'Contestant' else 0))), valid), 
         'true_nr': ('num', lambda r: 1 - ((num(r['TrueRank']) - 1) / (num(prmpt(r)['Responses']) - 1)), valid), 
         'score': ('num', lambda r: percent(r['Score']), valid),
-        'twow': ('str', lambda r: str(r['TWOW']), lambda p: str(p['TWOW'])),
-        'season': ('num', lambda r: num(r['Season']), lambda p: num(p['Season'])),
-        'round': ('num', lambda r: num(r['Round']), lambda p: num(p['Round'])),
-        'prompt': ('str', lambda r: str(prmpt(r)['Prompt']), lambda p: str(p['Prompt'])),
-        'contestants': ('num', lambda r: num(prmpt(r)['Contestants']), lambda p: num(p['Contestants'])),
-        'responses': ('num', lambda r: num(prmpt(r)['Responses']), lambda p: num(p['Responses'])),
-        'day': ('num', lambda r: num(str(prmpt(r)['Date']).split('.')[0]), lambda p: num(str(p['Date']).split('.')[0])),
-        'month': ('num', lambda r: num(str(prmpt(r)['Date']).split('.')[1]), lambda p: num(str(p['Date']).split('.')[1])),
-        'year': ('num', lambda r: num(str(prmpt(r)['Date']).split('.')[2]), lambda p: num(str(p['Date']).split('.')[2]))
+        'twow': ('str', lambda r: r['TWOW'], lambda p: p['TWOW']),
+        'season': ('num', lambda r: r['Season'], lambda p: p['Season']),
+        'round': ('num', lambda r: r['Round'], lambda p: p['Round']),
+        'prompt': ('str', lambda r: prmpt(r)['Prompt'], lambda p: p['Prompt']),
+        'contestants': ('num', lambda r: prmpt(r)['Contestants'], lambda p: p['Contestants']),
+        'responses': ('num', lambda r: prmpt(r)['Responses'], lambda p: p['Responses']),
+        'day': ('num', lambda r: str(prmpt(r)['Date']).split('.')[0], lambda p: str(p['Date']).split('.')[0]),
+        'month': ('num', lambda r: str(prmpt(r)['Date']).split('.')[1], lambda p: str(p['Date']).split('.')[1]),
+        'year': ('num', lambda r: str(prmpt(r)['Date']).split('.')[2], lambda p: str(p['Date']).split('.')[2])
     }
 
     gates = ['XNOR', 'NOR', 'NAND', 'NOT', 'AND', 'OR', 'XOR']
