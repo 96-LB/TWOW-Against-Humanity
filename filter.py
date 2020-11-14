@@ -138,8 +138,9 @@ class Filter:
                                     self.right = percent(self.right)
                                     self.filter = num_comp
                                 except:
-                                    malformed = True
-                                    error = f'setting "{i}" only accepts numerical values.'
+                                    if j in Filter.num_operators:                                        
+                                        malformed = True
+                                        error = f'operators "<=", "=>", "<", and ">" only accept numerical values, not "{self.right}".'
                             if not malformed and '|' in ftype:
                                 enum = [i.lower() for i in ftype.split('|')]
                                 if self.right.lower() not in enum:
