@@ -128,8 +128,8 @@ class TAH(commands.Cog):
                 ### MAIN CONTROL LOOP
             
                 if ctx.channel in self.games:
-                    print(f'{ctx.channel.id} popped because control loop terminated. ({response})')
                     self.games.pop(ctx.channel)
+                    print(f'{ctx.channel.id} popped because control loop terminated. ({response})')
 
     async def draw(self, game, player):
         response = await game.draw(player)
@@ -173,7 +173,7 @@ class TAH(commands.Cog):
             response = game.end(ctx.author)
             if response['ok']:
                 self.games.pop(ctx.channel)
-                print(f"{ctx.channel.id} popped because end command was run.")
+                print(f'{ctx.channel.id} popped because end command was run. ({response})')
             await ctx.send(response['message'])
 
 def setup(bot):
