@@ -16,4 +16,5 @@ python = "^3.8"
 regex = "^2020.6.8"
 discord-logger = "^1.1.2"
 discord = "^1.0.1"
+"discord.py" = "^1.6.0"
 [tool.poetry.dev-dependencies]
