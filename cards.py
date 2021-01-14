@@ -1,4 +1,4 @@
-import asyncio, data
+import asyncio, core.data as data
 from PIL import Image, ImageDraw, ImageFont
 from math import ceil
 from random import shuffle

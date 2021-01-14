@@ -1,13 +1,13 @@
-import data
+import core.data as data
+
 reserved = {
         'none': 'legal=legal'
 }
 
 filters = {}
 size = 0
-
 for i in data.get('FILTERS'):
-    author = i['Author']
+    author = int(i['Author'])
     name = i['Name']
     if author not in filters:
         filters[author] = {}
@@ -50,4 +50,4 @@ def update():
                 cells.append(l)
             else:
                 cells[size] = l
-    data.set('FILTERS', cells)
+    data.set_cells('FILTERS', cells)

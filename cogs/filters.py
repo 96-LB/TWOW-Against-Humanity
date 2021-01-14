@@ -1,4 +1,4 @@
-import os, filters
+import filters
 from discord.ext import commands
 from filter import parse
 
