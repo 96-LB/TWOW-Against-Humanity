@@ -95,6 +95,7 @@ class Filter:
         'nr': ('num', lambda r: 1 - ((num(r['Rank']) - 1) / (num(prmpt(r)['Contestants']) - (1 if str(r['Type']) == 'Contestant' else 0))), valid), 
         'true_nr': ('num', lambda r: 1 - ((num(r['TrueRank']) - 1) / (num(prmpt(r)['Responses']) - 1)), valid), 
         'score': ('num', lambda r: percent(r['Score']), valid),
+        'length': ('num', lambda r: len(r['Response']), lambda p: len(p['Prompt'])),
         'twow': ('str', lambda r: r['TWOW'], lambda p: p['TWOW']),
         'season': ('num', lambda r: r['Season'], lambda p: p['Season']),
         'round': ('num', lambda r: r['Round'], lambda p: p['Round']),
