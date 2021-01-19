@@ -201,6 +201,7 @@ class Game:
         lb = self.leaderboard()
         self.players.clear()
         self.stage = Stage.END;
+        print('Game ended.')
         return {'ok': True, 'message': 'Game successfully ended.' + lb['message']}
 
     ### MAIN CONTROL LOOP
@@ -265,6 +266,7 @@ class Game:
             out = {'ok': False, 'messages': [{'message': 'This game has already ended!', 'files':[]}], 'delay': 0}
         elif self.round > int(self.settings['rounds'].value):
             lb = self.leaderboard()
+            print('Ending game due to natural round progression...')
             self.end(self.author)
             out = {'ok': True, 'messages': [{'message': 'Game successfully completed. Thanks for playing!' + lb['message'], 'files': []}], 'delay': 0, 'force': True}
         
@@ -298,7 +300,7 @@ class Game:
                 fp = io.BytesIO()
                 (await self.cards.get_prompt_card(self.prompt, str(self.round))).save(fp, format='PNG')
                 fp.seek(0)
-            return {'ok': True, 'message': 'Choose a response to answer this prompt:.', 'data': {'files': [File(fp, 'prompt.png'), File(f, 'hand.png')], 'react': True, 'max': len(player.hand)}}
+            return {'ok': True, 'message': 'Choose a response to answer this prompt:', 'data': {'files': [File(fp, 'prompt.png'), File(f, 'hand.png')], 'react': True, 'max': len(player.hand)}}
         elif self.stage == Stage.VOTE:
             for i in self.votes:
                 if i == player:

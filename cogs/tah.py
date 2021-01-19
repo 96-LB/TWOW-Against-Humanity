@@ -170,6 +170,7 @@ class TAH(commands.Cog):
             await ctx.send('There is no game running in this channel.')
         else:
             game = self.games[ctx.channel]
+            print('Ending game due to command.')
             response = game.end(ctx.author)
             if response['ok']:
                 self.games.pop(ctx.channel)
