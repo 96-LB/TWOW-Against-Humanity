@@ -1,4 +1,4 @@
-import filters
+import data.filters as filters
 from discord.ext import commands
 from filter import parse
 

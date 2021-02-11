@@ -1,8 +1,8 @@
-import io, validator, asyncio, filters
+import io, validator, asyncio, data.filters as filters
 from stage import Stage
 from validator import Validator as V
 from player import Player
-from cards import Cards
+from data.cards import Cards
 from discord import File
 from filter import parse as filparse
 from functools import partial
