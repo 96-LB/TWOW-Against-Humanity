@@ -127,7 +127,7 @@ class TAH(commands.Cog):
                     response = await game.run()
                 ### MAIN CONTROL LOOP
             
-                if ctx.channel in self.games:
+                if ctx.channel in self.games and self.games[ctx.channel] == game:
                     self.games.pop(ctx.channel)
                     print(f'{ctx.channel.id} popped because control loop terminated. ({response})')
 
