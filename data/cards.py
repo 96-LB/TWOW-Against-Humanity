@@ -11,17 +11,17 @@ rounds_raw = data.get('ROUNDS')
 rounds = {}
 
 #builds the round data into a dictionary for easy access
-for i in rounds_raw:
-    ii = i.copy()
-    twow = ii.pop('TWOW')
-    season = ii.pop('Season')
-    round = ii.pop('Round')
+for round in rounds_raw:
+    copy = round.copy()
+    twow = copy.pop('TWOW')
+    season = copy.pop('Season')
+    round = copy.pop('Round')
     if twow not in rounds:
         rounds[twow] = {}
     if season not in rounds[twow]:
         rounds[twow][season] = {}   
     if round not in rounds[twow][season]:
-        rounds[twow][season][round] = ii
+        rounds[twow][season][round] = copy
 
 #used to run synchronous commands asynchronously
 loop = asyncio.get_running_loop()

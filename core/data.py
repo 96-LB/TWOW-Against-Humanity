@@ -32,4 +32,5 @@ def set(name, records, header=None):
 def set_cells(name, cells):
     #sets records in cell form
     sizes[name] = len(cells) - 1
+    print(cells)
     return sheet.worksheet(name).update(cells)
