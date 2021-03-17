@@ -97,11 +97,11 @@ def get_card_image(is_prompt, text, label=None):
             img = img.resize((int(img.width // factor), int(img.height // factor)))
 
             #centers the image
-            top = margin + (max_lines + len(lines)) * font['spacing'] / 2 - img.height // 2
-            left = (img_card.width - img.width) // 2
+            x = int((img_card.width - img.width) // 2)
+            y = int(margin + (max_lines + len(lines)) * font['spacing'] / 2 - img.height // 2)
             
             #using itself as a mask preserves transparency
-            img_card.paste(img, (top, left), img)
+            img_card.paste(img, (x, y), img)
 
         #combines the text image with the base card image
         img_text = img_text.resize(img_card.size)
