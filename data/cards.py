@@ -1,5 +1,5 @@
-import asyncio, core.data as data, exceptions
-from PIL import Image, ImageDraw, ImageFont
+import asyncio, core.data as data, exceptions, re, os
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from math import ceil
 from random import shuffle
 from concurrent.futures import ThreadPoolExecutor
@@ -28,12 +28,14 @@ loop = asyncio.get_running_loop()
 executor = ThreadPoolExecutor()
 
 #resources for building cards
-prompt_card = Image.open('Resources/Cards/tah_prompt.png')
-response_card = Image.open('Resources/Cards/tah_response.png')
+prompt_card = Image.open('res/card/tah_prompt.png')
+response_card = Image.open('res/card/tah_response.png')
 font = {
-    'font': ImageFont.truetype('Resources/Cards/font.ttf', 96),
+    'font': ImageFont.truetype('res/card/font.ttf', 96),
     'spacing': 32
 }
+margin = 45
+max_lines = 10
 
 #####
 
@@ -47,8 +49,25 @@ def get_card_image(is_prompt, text, label=None):
         text = str(text) if text is not None else ''
         label = str(label) if label is not None else ''
         
+        #checks for an image tag at the end of the text
+        img = None
+        match = re.search(r'{{img\(([^()]*)\)}}(\\*)$', text)
+        if match:
+            #trims the text
+            text = text[:-1 if match.group(2) else match.start()]
+            try:
+                #opens the specified path, normalizing to prevent directory traversal
+                filepath = 'res/img/' + os.path.normpath('/' + match.group(1)).lstrip('/')
+                img = Image.open(filepath).convert('RGBA')
+            except (UnidentifiedImageError, FileNotFoundError) as e:
+                #loads a default image on error
+                print(f'ERROR: {e}')
+                img = Image.open('res/card/missing.png').convert('RGBA')
+
+        #draws the text on an upscaled canvas
+        res = 4
         img_card = (prompt_card if is_prompt else response_card).copy()
-        img_text = Image.new('RGBA', (img_card.width * 4, img_card.height * 4))
+        img_text = Image.new('RGBA', (img_card.width * res, img_card.height * res))
         drawer = ImageDraw.Draw(img_text)
 
         #splits the words onto separate lines so that they fit on the card
@@ -56,21 +75,39 @@ def get_card_image(is_prompt, text, label=None):
         lines = []
         last = ''
         for word in words:
-            if drawer.textsize(f'{last} {word}', **font)[0] > img_text.width - 360:
+            if drawer.textsize(f'{last} {word}', **font)[0] > img_text.width - margin * 2 * res:
                 lines.append(last)
                 last = ''
             last += word + ' '
         lines.append(last)
         
-        #draws the text in the top left and the label in the bottom right
+        #draws the text in the top left
         color = '#f0f0f0' if is_prompt else '#000000'
-        drawer.text((180, 180), '\n'.join(lines), color, **font)
+        drawer.text((margin * res, margin * res), '\n'.join(lines), color, **font)
         
+        #draws the label in the bottom right
         w, h = drawer.textsize(label, **font)
-        drawer.text((img_text.width - 180 - w, img_text.height - 180 - h), label, color, **font)
+        drawer.text((img_text.width - margin * res - w, img_text.height - margin * res - h), label, color, **font)
         
+        #draws the image if there is space
+        if img and len(lines) < max_lines:
+            #resizes the image
+            factor = img.width / (img_card.width - margin * 2)
+            factor = max(factor, img.height / ((max_lines - len(lines)) * font['spacing']))
+            img = img.resize((int(img.width // factor), int(img.height // factor)))
+
+            #centers the image
+            top = margin + (max_lines + len(lines)) * font['spacing'] / 2 - img.height // 2
+            left = (img_card.width - img.width) // 2
+            
+            #using itself as a mask preserves transparency
+            img_card.paste(img, (top, left), img)
+
         #combines the text image with the base card image
-        return Image.alpha_composite(img_card, img_text.resize(img_card.size, Image.ANTIALIAS))
+        img_text = img_text.resize(img_card.size)
+        img_card.alpha_composite(img_text)
+
+        return img_card
 
 
 class Cards:
