@@ -1,4 +1,4 @@
-import asyncio, core.data as data, exceptions, re, os
+import asyncio, core.data as data, util.exceptions as exceptions, re, os
 from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 from math import ceil
 from random import shuffle
