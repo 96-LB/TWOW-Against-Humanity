@@ -1,8 +1,8 @@
 import discord, asyncio, reaction as react
 from discord.ext import commands
 from game import Game
-from stage import Stage
-from asyncmyo import ensure
+from util.enum import Stage
+from util.asyncmyo import ensure
 from functools import partial
 
 class TAH(commands.Cog):

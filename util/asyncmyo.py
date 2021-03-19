@@ -1,4 +1,5 @@
 async def ensure(coro, repeat=10):
+    #retries a coroutine multiple times if an error is thrown
     i = 1
     while(i < repeat):
         try:
