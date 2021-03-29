@@ -4,10 +4,10 @@ requires = ["poetry>=0.12"]
 
 [tool]
 [tool.poetry]
-authors = ["Lucas LaBuff <lucasbeef00@gmail.com>"]
+name = "TWOW-Against-Humanity"
 description = "The TWOW Against Humanity Discord bot."
-name = "TWOW Against Humanity"
 version = "0.1.0"
+authors = ["Lucas LaBuff <lucasbeef00@gmail.com>"]
 [tool.poetry.dependencies]
 Flask = "^1.1"
 Pillow = "^7.1"
